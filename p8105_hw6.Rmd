@@ -2,22 +2,25 @@
 title: "p8105_hw6"
 author: "Yiying Chen yc4776"
 date: "2025-12-02"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r problem_1, warning = FALSE, message = FALSE}
+```{r problem_1_data_clean, warning = FALSE, message = FALSE}
 library(tidyverse)
 homicide_data = read.csv("data/homicide-data.csv")
 
-homicide_data = homicide_data |>
+homicide_data_clean = homicide_data |>
   mutate(city_state = paste(city, state, sep = ", "),
          binary_open = case_when(
       disposition == "Open/No arrest"  ~ "0",
       disposition != "Open/No arrest" ~ "1",
-      TRUE ~ NA_character_))
+      TRUE ~ NA_character_),
+      victim_age = as.numeric(victim_age)) |>
+  filter(!city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))|>
+  filter(victim_race %in% c("White","Black"))
 
 ```
