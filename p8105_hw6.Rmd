@@ -1,0 +1,23 @@
+---
+title: "p8105_hw6"
+author: "Yiying Chen yc4776"
+date: "2025-12-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r problem_1, warning = FALSE, message = FALSE}
+library(tidyverse)
+homicide_data = read.csv("data/homicide-data.csv")
+
+homicide_data = homicide_data |>
+  mutate(city_state = paste(city, state, sep = ", "),
+         binary_open = case_when(
+      disposition == "Open/No arrest"  ~ "0",
+      disposition != "Open/No arrest" ~ "1",
+      TRUE ~ NA_character_))
+
+```
