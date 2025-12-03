@@ -15,7 +15,7 @@ homicide_data = read.csv("data/homicide-data.csv")
 
 homicide_data_clean = homicide_data |>
   mutate(city_state = paste(city, state, sep = ", "),
-         binary_open = case_when(
+         resolved = case_when(
       disposition == "Open/No arrest"  ~ 0,
       disposition != "Open/No arrest" ~ 1),
       victim_age = as.numeric(victim_age)) |>
@@ -26,25 +26,49 @@ homicide_data_clean = homicide_data |>
 ```{r problem_1_Baltimore}
 library(broom)
 
-baltimore_data = homicide_data_clean |>
+baltimore_data = 
+  homicide_data_clean |>
   filter(city_state == "Baltimore, MD")
 
 set.seed(123)
-baltimore_fit = glm(
-    binary_open ~ victim_age + victim_sex + victim_race,
-    data   = baltimore_data
-  )
+baltimore_fit = 
+  baltimore_data |> 
+  glm(resolved ~ victim_age + victim_race + victim_sex, data = _, family = binomial()) 
 
-baltimore_tidy = 
-  tidy(
-    baltimore_fit,
-    exponentiate = TRUE,  
-    conf.int     = TRUE  
-  )
+baltimore_fit |> 
+  broom::tidy(exponentiate = TRUE, conf.int = TRUE) |> 
+  filter(term == "victim_sexMale") |> 
+  select(term, OR = estimate, conf.low, conf.high) |> 
+  knitr::kable(digits = 3)
 
-baltimore_tidy = 
-  baltimore_tidy |>
-  select(term, estimate, conf.low, conf.high)
 
-baltimore_tidy
+
+```
+
+```{r problem_1_city, warning = FALSE}
+city_data =
+  homicide_data_clean |>
+  group_by(city_state) |>
+  tidyr::nest() |>
+  mutate(
+    city_fit = purrr::map(
+      data,
+      ~ glm(
+          resolved ~ victim_age + victim_sex + victim_race,
+          data   = .x,
+          family = binomial()
+        )
+    ),
+    city_tidy = purrr::map(
+      city_fit,
+      ~ broom::tidy(.x, exponentiate = TRUE, conf.int = TRUE)
+    )
+  ) |>
+  tidyr::unnest(city_tidy) |>
+  ungroup() |>
+  
+  filter(term == "victim_sexMale") |>
+  select(city_state, estimate, conf.low, conf.high)
+
+city_data
 ```
