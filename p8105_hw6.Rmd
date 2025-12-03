@@ -97,6 +97,7 @@ library(tidyverse)
 library(p8105.datasets)
 data("weather_df")
 
+set.seed(123)
 boot_sample = function(df) {
   sample_frac(df, replace = TRUE)
 }
@@ -107,9 +108,54 @@ boot_straps =
     strap_sample = map(strap_number, \(i) boot_sample(df = weather_df))
   )
 
-boot_straps |> 
-  slice(1:3) |> 
-  mutate(strap_sample = map(strap_sample, \(s) arrange(s, tmax))) |> 
-  pull(strap_sample)
+boot_results =
+  boot_straps |> 
+  mutate(
+    boot_fit   = map(strap_sample,\(df) lm(tmax ~ tmin + prcp, data = df)),
+    boot_glance = map(boot_fit, broom::glance),   
+    boot_tidy   = map(boot_fit, broom::tidy)
+  )
 
+boot_results =
+  boot_results |>
+  mutate(
+    r_squared = map_dbl(boot_glance, "r.squared"),
+    beta_ratio = map_dbl(
+      boot_tidy,
+      \(df) {
+        b1 <- filter(df, term == "tmin") |> pull(estimate)
+        b2 <- filter(df, term == "prcp") |> pull(estimate)
+        b1 / b2
+      }
+    )
+  )|>
+  select(strap_number, r_squared, beta_ratio)
+
+ggplot(boot_results, aes(x = r_squared)) +
+  geom_histogram(bins = 30, color = "white") +
+  labs(
+    x = expression(R^2),
+    title = "Bootstrap distribution of R-squared"
+  ) +
+  theme_minimal()
+
+ggplot(boot_results, aes(x = beta_ratio)) +
+  geom_histogram(bins = 30, color = "white") +
+  labs(
+    x = expression(hat(beta)[1] / hat(beta)[2]),
+    title = "Bootstrap distribution of beta1/beta2"
+  ) +
+  theme_minimal()
+
+boot_results |> 
+  summarize(
+    r2_lower = quantile(r_squared, 0.025),
+    r2_upper = quantile(r_squared, 0.975),
+    
+    ratio_lower = quantile(beta_ratio, 0.025),
+    ratio_upper = quantile(beta_ratio, 0.975)
+  )
 ```
+
+#In the Bootstrap distribution of R-squared, it's a nearly symmetric distribution, centered around about 0.94.
+#In the Bootstrap distribution of beta1/beta2, it's a right-skewed distribution.
