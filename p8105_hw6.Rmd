@@ -9,6 +9,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Problem 1
 ```{r problem_1_data_clean, warning = FALSE, message = FALSE}
 library(tidyverse)
 homicide_data = read.csv("data/homicide-data.csv")
@@ -91,7 +92,7 @@ city_data |>
     plot.title = element_text(size = 8)
   )
 ```
-
+## Problem 2
 ```{r problem_2}
 library(tidyverse)
 library(p8105.datasets)
@@ -159,3 +160,20 @@ boot_results |>
 
 #In the Bootstrap distribution of R-squared, it's a nearly symmetric distribution, centered around about 0.94.
 #In the Bootstrap distribution of beta1/beta2, it's a right-skewed distribution.
+
+## Problem3
+```{r problem_3}
+birthweight = 
+  read.csv("data/birthweight.csv") |>
+  janitor::clean_names() |>
+  mutate(
+    babysex = as.factor(babysex),
+    malform = as.factor(malform),
+    mrace   = as.factor(mrace),
+    frace   = as.factor(frace)
+  )
+
+summary(birthweight)
+
+
+```
