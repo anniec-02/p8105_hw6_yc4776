@@ -72,3 +72,22 @@ city_data =
 
 city_data
 ```
+```{r problem_1_plot, warning = FALSE, message = FALSE}
+city_data |>
+  mutate(
+    city_state = fct_reorder(city_state, estimate)
+  ) |>
+  ggplot(aes(x = estimate, y = city_state)) +
+  geom_point() +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0) +
+  labs(
+    x = "estimated ORs",
+    y = "City",
+    title = "Estimated ORs and CIs for each city for solving homicides comparing male victims to female victims"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = 6),
+    plot.title = element_text(size = 8)
+  )
+```
