@@ -182,3 +182,23 @@ summary(model)
 ```
 ### I chose to start with fitting a model using all predictors to examine variable importance and identify potential contributors to birthweight. Then I fit the significant ones again using linear model.
 
+```{r problem_3_plot}
+library(modelr)
+library(ggplot2)
+
+birthweight |>
+  add_predictions(model) |>
+  add_residuals(model) |>
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, color = "red") +
+  labs(
+    x = "Fitted values",
+    y = "Residuals",
+    title = "Residuals v.s. Fitted Values"
+  ) +
+  theme_minimal()
+
+```
+
+
