@@ -17,14 +17,14 @@ homicide_data = read.csv("data/homicide-data.csv")
 homicide_data_clean = homicide_data |>
   mutate(city_state = paste(city, state, sep = ", "),
          resolved = case_when(
-      disposition == "Open/No arrest"  ~ 0,
-      disposition != "Open/No arrest" ~ 1),
+      disposition == "Closed by arrest"  ~ 1,
+      disposition != "Closed by arrest" ~ 0),
       victim_age = as.numeric(victim_age)) |>
   filter(!city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))|>
   filter(victim_race %in% c("White","Black"))
 ```
 
-```{r problem_1_Baltimore}
+```{r problem_1_Baltimore, message = FALSE, warning = FALSE}
 library(broom)
 
 baltimore_data = 
@@ -46,7 +46,7 @@ baltimore_fit |>
 
 ```
 
-```{r problem_1_city, warning = FALSE}
+```{r problem_1_city, message = FALSE, warning = FALSE}
 city_data =
   homicide_data_clean |>
   group_by(city_state) |>
@@ -93,7 +93,7 @@ city_data |>
   )
 ```
 ## Problem 2
-```{r problem_2}
+```{r problem_2, message = FALSE, warning = FALSE}
 library(tidyverse)
 library(p8105.datasets)
 data("weather_df")
@@ -162,7 +162,7 @@ boot_results |>
 #In the Bootstrap distribution of beta1/beta2, it's a right-skewed distribution.
 
 ## Problem3
-```{r problem_3}
+```{r problem_3, message = FALSE, warning = FALSE}
 birthweight = 
   read.csv("data/birthweight.csv") |>
   janitor::clean_names() |>
@@ -182,7 +182,7 @@ summary(model)
 ```
 ### I chose to start with fitting a model using all predictors to examine variable importance and identify potential contributors to birthweight. Then I fit the significant ones again using linear model.
 
-```{r problem_3_plot}
+```{r problem_3_plot, message = FALSE, warning = FALSE}
 library(modelr)
 library(ggplot2)
 
@@ -200,7 +200,7 @@ birthweight |>
   theme_minimal()
 
 ```
-```{r problem_3_cross_validation, warning = FALSE}
+```{r problem_3_cross_validation, message = FALSE, warning = FALSE}
 library(modelr)
 library(mgcv)
 library(purrr)
@@ -228,7 +228,7 @@ cv_result =
 
 cv_result
 ```
-```{r problem_3_cv_plot}
+```{r problem_3_cv_plot, message = FALSE, warning = FALSE}
 cv_result |> 
   select(starts_with("rmse")) |> 
   pivot_longer(
