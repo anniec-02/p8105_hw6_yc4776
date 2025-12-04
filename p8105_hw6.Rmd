@@ -173,7 +173,12 @@ birthweight =
     frace   = as.factor(frace)
   )
 
-summary(birthweight)
+#Test which variables should be put into the model
+fit_birthweight = lm(formula = bwt ~ ., data = birthweight)
+summary(fit_birthweight)
 
-
+model = lm(formula = bwt ~ babysex + bhead + blength + delwt + gaweeks + mrace + parity + smoken, data = birthweight)
+summary(model)
 ```
+### I chose to start with fitting a model using all predictors to examine variable importance and identify potential contributors to birthweight. Then I fit the significant ones again using linear model.
+
